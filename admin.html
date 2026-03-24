@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZapZone Admin Panel</title>
+  <style>
+/* ════════════════════════════════════════════════════════════════
+   ZapZone Admin Panel Styles
+   ════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0e1a;
+  --bg-sidebar: #080c18;
+  --bg-panel: #111827;
+  --bg-panel2: #0f1623;
+  --border: rgba(255,255,255,0.08);
+  --border-blue: rgba(0,191,255,0.2);
+  --primary: #00BFFF;
+  --primary-hover: #00A0D8;
+  --accent: #FFD700;
+  --success: #22DD66;
+  --danger: #FF3344;
+  --warning: #FF9900;
+  --text: #e0e6f0;
+  --text-dim: #6B7A94;
+  --text-muted: #3d4a5e;
+  --font: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+}
+
+body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; overflow: hidden; }
+
+/* ── Admin Login ── */
+.admin-login {
+  display: flex; align-items: center; justify-content: center;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, #0d1b3e 0%, #050810 100%);
+}
+.admin-login-box {
+  background: var(--bg-panel); border: 1px solid var(--border-blue);
+  border-radius: 20px; padding: 44px 48px; width: 380px;
+  box-shadow: 0 0 80px rgba(0,191,255,0.1), 0 20px 60px rgba(0,0,0,0.6);
+}
+.admin-logo { text-align: center; margin-bottom: 32px; }
+.admin-logo .logo-icon { font-size: 2.5rem; filter: drop-shadow(0 0 15px #FFD700); }
+.admin-logo h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: 5px; color: #fff; margin-top: 4px; }
+.admin-badge {
+  display: inline-block; margin-top: 8px;
+  background: rgba(0,191,255,0.15); border: 1px solid var(--border-blue);
+  color: var(--primary); font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 3px; padding: 4px 16px; border-radius: 20px;
+}
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase; }
+.form-group input {
+  width: 100%; padding: 11px 16px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; font-size: 0.95rem; outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,191,255,0.15); }
+.al-error { color: var(--danger); font-size: 0.85rem; text-align: center; margin: 12px 0; min-height: 20px; }
+.btn-admin-primary {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: #fff; border: none; border-radius: 8px; cursor: pointer;
+  font-weight: 700; font-size: 0.95rem; letter-spacing: 1px;
+  box-shadow: 0 4px 20px rgba(0,191,255,0.3); transition: all 0.2s;
+}
+.btn-admin-primary:hover { box-shadow: 0 6px 28px rgba(0,191,255,0.5); transform: translateY(-1px); }
+
+/* ── Admin Panel Layout ── */
+.admin-panel { display: flex; height: 100vh; overflow: hidden; }
+
+/* ── Sidebar ── */
+.admin-sidebar {
+  width: 230px; background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden; flex-shrink: 0;
+}
+.sidebar-logo {
+  padding: 18px 20px; border-bottom: 1px solid var(--border);
+  font-size: 1.1rem; font-weight: 900; color: var(--primary);
+  letter-spacing: 2px; display: flex; flex-direction: column; gap: 8px;
+}
+.sidebar-logo span { color: var(--accent); }
+.admin-user-chip { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.admin-user-chip span:first-child { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+.role-chip { font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; letter-spacing: 1px; }
+.role-chip.role-owner, .role-chip.role-supreme { background: rgba(255,215,0,0.2); color: var(--accent); border: 1px solid rgba(255,215,0,0.3); }
+.role-chip.role-admin { background: rgba(0,191,255,0.15); color: var(--primary); border: 1px solid var(--border-blue); }
+.role-chip.role-player { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 10px; }
+.nav-section-label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; padding: 14px 10px 6px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  color: var(--text-dim); text-decoration: none; font-size: 0.88rem; font-weight: 500;
+  transition: all 0.15s; cursor: pointer; border: none; background: none; width: 100%;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.nav-item.active { background: rgba(0,191,255,0.12); color: var(--primary); font-weight: 700; }
+.nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+.sidebar-bottom { padding: 12px 10px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+.logout-btn { color: var(--danger) !important; }
+.logout-btn:hover { background: rgba(255,51,68,0.1) !important; }
+
+/* ── Main ── */
+.admin-main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.admin-main::-webkit-scrollbar { width: 6px; }
+.admin-main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Pages ── */
+.admin-page { display: none; flex-direction: column; flex: 1; padding: 24px 28px; gap: 20px; }
+.admin-page.active { display: flex; }
+
+.page-header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.page-header h1 { font-size: 1.5rem; font-weight: 800; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.last-updated { font-size: 0.78rem; color: var(--text-dim); }
+
+/* ── Buttons ── */
+.btn-sm { padding: 7px 16px; border-radius: 7px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 700; transition: all 0.15s; }
+.btn-primary-sm { background: var(--primary); color: #fff; }
+.btn-primary-sm:hover { background: var(--primary-hover); }
+.btn-danger-sm { background: rgba(255,51,68,0.15); color: var(--danger); border: 1px solid rgba(255,51,68,0.3); padding: 7px 14px; border-radius: 7px; cursor: pointer; font-size: 0.82rem; font-weight: 700; }
+.btn-success-sm { background: rgba(34,221,102,0.15); color: var(--success); border: 1px solid rgba(34,221,102,0.3); padding: 7px 14px; border-radius: 7px; cursor: pointer; font-size: 0.82rem; font-weight: 700; }
+.btn-warn-sm { background: rgba(255,153,0,0.15); color: var(--warning); border: 1px solid rgba(255,153,0,0.3); padding: 7px 14px; border-radius: 7px; cursor: pointer; font-size: 0.82rem; font-weight: 700; }
+.btn-sm-neutral { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--border); padding: 7px 14px; border-radius: 7px; cursor: pointer; font-size: 0.82rem; font-weight: 600; }
+.btn-xs { padding: 4px 10px; border-radius: 5px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text-dim); cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.15s; }
+.btn-xs:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+.btn-danger-xs { border-color: rgba(255,51,68,0.3); color: var(--danger); background: rgba(255,51,68,0.08); }
+.btn-danger-xs:hover { background: rgba(255,51,68,0.15); }
+.btn-success-xs { border-color: rgba(34,221,102,0.3); color: var(--success); background: rgba(34,221,102,0.08); }
+.btn-warn-xs { border-color: rgba(255,153,0,0.3); color: var(--warning); background: rgba(255,153,0,0.08); }
+
+/* ── Stat Cards ── */
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; flex-shrink: 0; }
+.stat-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; display: flex; align-items: center; gap: 14px; transition: border-color 0.2s; }
+.stat-card:hover { border-color: var(--border-blue); }
+.stat-icon { font-size: 1.8rem; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 10px; flex-shrink: 0; }
+.stat-value { font-size: 1.5rem; font-weight: 900; }
+.stat-label { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+
+/* ── Dashboard Grid ── */
+.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 16px; }
+.dash-panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+.dash-panel.wide { grid-column: span 3; }
+.dash-panel h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+.dash-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border-radius: 8px; margin-bottom: 6px; font-size: 0.85rem; }
+.dash-item-icon { font-size: 1.1rem; margin-top: 1px; }
+.dash-item-title { font-weight: 600; margin-bottom: 2px; }
+.dash-item-sub { font-size: 0.75rem; color: var(--text-dim); }
+.anno-info { background: rgba(0,191,255,0.06); border: 1px solid rgba(0,191,255,0.15); }
+.anno-warning { background: rgba(255,153,0,0.06); border: 1px solid rgba(255,153,0,0.15); }
+.anno-danger { background: rgba(255,51,68,0.06); border: 1px solid rgba(255,51,68,0.15); }
+.anno-success { background: rgba(34,221,102,0.06); border: 1px solid rgba(34,221,102,0.15); }
+.empty-dash { color: var(--text-dim); font-size: 0.85rem; text-align: center; padding: 20px; }
+
+.server-health { display: flex; flex-direction: column; gap: 8px; }
+.health-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+.health-row span { color: var(--text-dim); }
+.mem-bar-wrap { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.mem-bar { flex: 1; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+.mem-bar-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.5s; }
+.mem-bar-fill.warning { background: var(--warning); }
+.mem-bar-fill.danger { background: var(--danger); }
+
+.quick-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.qa-btn { padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-dim); border-radius: 10px; cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all 0.2s; }
+.qa-btn:hover { background: rgba(0,191,255,0.1); border-color: var(--border-blue); color: var(--primary); }
+
+/* ── Live Monitor ── */
+.live-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; }
+.live-panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px; overflow: hidden; display: flex; flex-direction: column; }
+.live-panel.wide { grid-column: span 2; }
+.live-panel h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.live-badge { background: var(--primary); color: #fff; font-size: 0.7rem; padding: 1px 8px; border-radius: 10px; }
+.live-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.live-item { background: var(--bg-panel2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; }
+.live-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.live-room-id { font-family: monospace; font-weight: 700; color: var(--primary); }
+.live-item-sub { color: var(--text-dim); font-size: 0.78rem; margin-bottom: 6px; }
+.live-status { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.live-status.status-playing { background: rgba(34,221,102,0.15); color: var(--success); }
+.live-status.status-waiting { background: rgba(255,215,0,0.15); color: var(--accent); }
+.event-log { overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 4px; }
+.log-entry { font-size: 0.78rem; color: var(--text-dim); padding: 4px 6px; background: rgba(255,255,255,0.02); border-radius: 4px; }
+.log-time { color: var(--primary); margin-right: 6px; font-family: monospace; }
+
+/* ── Tables ── */
+.table-wrap { overflow: auto; flex: 1; border-radius: 12px; border: 1px solid var(--border); }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.admin-table thead { position: sticky; top: 0; z-index: 2; }
+.admin-table th { background: var(--bg-panel2); padding: 12px 14px; text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.admin-table td { padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+.admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+.admin-table tr:last-child td { border-bottom: none; }
+.banned-row td { opacity: 0.65; }
+.owner-row td { }
+.admin-row td { }
+.player-name-cell { display: flex; align-items: center; gap: 8px; }
+.player-avatar { font-size: 1.1rem; }
+.badge-banned { background: rgba(255,51,68,0.2); color: var(--danger); font-size: 0.65rem; font-weight: 800; padding: 1px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 1px; }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.status-dot.active { background: var(--success); box-shadow: 0 0 6px var(--success); }
+.status-dot.banned { background: var(--danger); }
+.actions-cell { display: flex; gap: 5px; flex-wrap: nowrap; }
+.empty-cell { text-align: center; padding: 30px; color: var(--text-dim); }
+.rank-cell { font-size: 1.1rem; text-align: center; }
+
+.role-chip-sm { font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; letter-spacing: 1px; }
+.role-chip-sm.role-owner { background: rgba(255,215,0,0.2); color: var(--accent); }
+.role-chip-sm.role-admin { background: rgba(0,191,255,0.15); color: var(--primary); }
+.role-chip-sm.role-player { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+
+.status-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+.status-badge.status-playing { background: rgba(34,221,102,0.15); color: var(--success); }
+.status-badge.status-waiting { background: rgba(255,215,0,0.15); color: var(--accent); }
+.status-badge.status-ended { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+
+.mode-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 10px; background: rgba(0,191,255,0.1); color: var(--primary); }
+
+/* ── Pagination ── */
+.pagination { display: flex; gap: 6px; justify-content: center; padding: 12px 0; }
+.pg-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-dim); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: all 0.15s; }
+.pg-btn:hover { border-color: var(--border-blue); color: var(--primary); }
+.pg-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* ── Search / Filter ── */
+.search-input { padding: 8px 14px; background: var(--bg-panel); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 0.85rem; outline: none; width: 220px; }
+.search-input:focus { border-color: var(--border-blue); }
+.filter-select { padding: 8px 12px; background: var(--bg-panel); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 0.85rem; cursor: pointer; outline: none; }
+
+/* ── Modal ── */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal-box { background: var(--bg-panel); border: 1px solid var(--border-blue); border-radius: 18px; width: 680px; max-width: 95vw; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 0 60px rgba(0,191,255,0.1); }
+.modal-box.large { width: 780px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border); }
+.modal-header h2 { font-size: 1.2rem; font-weight: 800; }
+.modal-close { background: none; border: none; color: var(--text-dim); font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 4px; }
+.modal-close:hover { color: var(--danger); }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.modal-actions { padding: 16px 24px; border-top: 1px solid var(--border); }
+
+.player-detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.detail-section { background: var(--bg-panel2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.detail-section h4 { font-size: 0.78rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.detail-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.82rem; }
+.detail-row:last-child { border-bottom: none; }
+.detail-row span { color: var(--text-dim); }
+.detail-row strong { font-weight: 700; }
+.ban-info { background: rgba(255,51,68,0.06); border-radius: 4px; margin: 4px -6px; padding: 4px 6px; }
+.modal-action-group { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── Economy ── */
+.economy-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.eco-panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.eco-panel h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+.eco-form { display: flex; flex-direction: column; gap: 10px; }
+.eco-input { padding: 10px 14px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+.eco-input:focus { border-color: var(--border-blue); }
+.eco-result { margin-top: 10px; font-size: 0.82rem; padding: 8px 12px; border-radius: 6px; min-height: 36px; }
+.eco-result-success { background: rgba(34,221,102,0.1); color: var(--success); border: 1px solid rgba(34,221,102,0.2); }
+.eco-result-error { background: rgba(255,51,68,0.1); color: var(--danger); border: 1px solid rgba(255,51,68,0.2); }
+
+/* ── Announce ── */
+.announce-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; }
+.announce-compose { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.announce-compose h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+.announce-compose textarea { padding: 12px 14px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 0.9rem; resize: vertical; outline: none; font-family: var(--font); }
+.announce-compose textarea:focus { border-color: var(--border-blue); }
+.announce-type-row { display: flex; gap: 10px; align-items: center; }
+.announce-type-row select { padding: 10px 12px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); border-radius: 8px; cursor: pointer; font-size: 0.9rem; flex: 1; }
+#announce-result { font-size: 0.82rem; color: var(--success); }
+.announce-history { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.announce-history h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+.history-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.history-item { padding: 12px 14px; border-radius: 8px; font-size: 0.85rem; }
+.history-msg { font-weight: 600; margin-bottom: 4px; }
+.history-meta { font-size: 0.75rem; color: var(--text-dim); }
+.type-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 4px; }
+
+/* ── Server Info ── */
+.server-info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.info-panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.info-panel h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; }
+.info-row:last-child { border-bottom: none; }
+.info-row span { color: var(--text-dim); }
+
+/* ── Admin Notifications ── */
+.admin-notif {
+  position: fixed; top: 20px; right: 20px; padding: 12px 20px;
+  border-radius: 10px; font-weight: 700; font-size: 0.9rem;
+  z-index: 10000; animation: slideIn 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4); min-width: 200px;
+}
+@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } }
+.admin-notif-info { background: rgba(0,191,255,0.15); border: 1px solid rgba(0,191,255,0.4); color: #00BFFF; }
+.admin-notif-success { background: rgba(34,221,102,0.15); border: 1px solid rgba(34,221,102,0.4); color: #22DD66; }
+.admin-notif-error { background: rgba(255,51,68,0.15); border: 1px solid rgba(255,51,68,0.4); color: #FF3344; }
+.admin-notif-warning { background: rgba(255,153,0,0.15); border: 1px solid rgba(255,153,0,0.4); color: #FF9900; }
+.admin-notif.fade-out { animation: fadeOut 0.4s ease forwards; }
+@keyframes fadeOut { to { opacity: 0; transform: translateX(100px); } }
+
+/* ── Scrollbars ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,191,255,0.3); }
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .dashboard-grid { grid-template-columns: 1fr 1fr; }
+  .dash-panel.wide { grid-column: span 2; }
+  .player-detail-grid { grid-template-columns: 1fr 1fr; }
+  .server-info-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 800px) {
+  .admin-sidebar { width: 60px; }
+  .sidebar-logo, .nav-section-label, .nav-item span:not(.nav-icon), .admin-user-chip { display: none; }
+  .nav-item { justify-content: center; padding: 10px; }
+  .economy-grid, .announce-grid { grid-template-columns: 1fr; }
+  .player-detail-grid { grid-template-columns: 1fr; }
+}
+
+  </style>
+</head>
+<body>
+
+<!-- ══════════ ADMIN LOGIN ══════════ -->
+<div id="admin-login" class="admin-login">
+  <div class="admin-login-box">
+    <div class="admin-logo">
+      <span class="logo-icon">⚡</span>
+      <h1>ZAPZONE</h1>
+      <span class="admin-badge">ADMIN PANEL</span>
+    </div>
+    <form onsubmit="adminLogin(event)">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="al-user" placeholder="Admin username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="al-pass" placeholder="Password" autocomplete="current-password">
+      </div>
+      <div id="al-error" class="al-error"></div>
+      <button type="submit" class="btn-admin-primary">Access Panel</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN PANEL ══════════ -->
+<div id="admin-panel" class="admin-panel" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span>⚡</span> ZapZone
+      <div class="admin-user-chip">
+        <span id="admin-username-display"></span>
+        <span id="admin-role-display" class="role-chip"></span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a href="#" class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a href="#" class="nav-item" data-page="live" onclick="showPage('live')">
+        <span class="nav-icon">🔴</span> Live Monitor
+      </a>
+
+      <div class="nav-section-label">Players</div>
+      <a href="#" class="nav-item" data-page="players" onclick="showPage('players')">
+        <span class="nav-icon">👥</span> Players
+      </a>
+      <a href="#" class="nav-item" data-page="bans" onclick="showPage('bans')">
+        <span class="nav-icon">🚫</span> Ban List
+      </a>
+      <a href="#" class="nav-item" data-page="leaderboard" onclick="showPage('leaderboard')">
+        <span class="nav-icon">🏆</span> Leaderboard
+      </a>
+
+      <div class="nav-section-label">Game</div>
+      <a href="#" class="nav-item" data-page="rooms" onclick="showPage('rooms')">
+        <span class="nav-icon">🎮</span> Game Rooms
+      </a>
+      <a href="#" class="nav-item" data-page="economy" onclick="showPage('economy')">
+        <span class="nav-icon">💰</span> Economy
+      </a>
+      <a href="#" class="nav-item" data-page="announce" onclick="showPage('announce')">
+        <span class="nav-icon">📢</span> Announce
+      </a>
+
+      <div class="nav-section-label">System</div>
+      <a href="#" class="nav-item" data-page="settings" onclick="showPage('settings')">
+        <span class="nav-icon">⚙</span> Server Info
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="/" target="_blank" class="nav-item"><span class="nav-icon">🎮</span> Play Game</a>
+      <button class="nav-item logout-btn" onclick="adminLogout()"><span class="nav-icon">↩</span> Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+
+    <!-- ── Dashboard ── -->
+    <div id="page-dashboard" class="admin-page active">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn-sm btn-primary-sm" onclick="refreshDashboard()">↻ Refresh</button>
+          <span class="last-updated" id="last-updated"></span>
+        </div>
+      </div>
+
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="stat-icon online">🟢</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-online">0</div>
+            <div class="stat-label">Online Players</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon total">👥</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Total Accounts</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon matches">🎮</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-matches">0</div>
+            <div class="stat-label">Active Rooms</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon kills">💀</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-kills">0</div>
+            <div class="stat-label">Total Kills</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon waiting">⏳</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-waiting">0</div>
+            <div class="stat-label">Waiting Rooms</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon total-matches">📈</div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-total-matches">0</div>
+            <div class="stat-label">Total Matches</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dash-panel">
+          <h3>Recent Announcements</h3>
+          <div id="dash-announcements" class="dash-list"></div>
+        </div>
+        <div class="dash-panel">
+          <h3>Server Health</h3>
+          <div id="server-health" class="server-health"></div>
+        </div>
+        <div class="dash-panel wide">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="qa-btn" onclick="showPage('players')">Manage Players</button>
+            <button class="qa-btn" onclick="showPage('rooms')">View Rooms</button>
+            <button class="qa-btn" onclick="showPage('announce')">Send Announcement</button>
+            <button class="qa-btn" onclick="showPage('economy')">Economy Tools</button>
+            <button class="qa-btn" onclick="showPage('bans')">View Bans</button>
+            <button class="qa-btn" onclick="showPage('leaderboard')">Rankings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Live Monitor ── -->
+    <div id="page-live" class="admin-page">
+      <div class="page-header"><h1>Live Monitor</h1><button class="btn-sm btn-primary-sm" onclick="startLiveMonitor()">▶ Start Live</button></div>
+      <div class="live-grid">
+        <div class="live-panel">
+          <h3>Online Players <span id="live-count" class="live-badge">0</span></h3>
+          <div id="live-players-list" class="live-list"></div>
+        </div>
+        <div class="live-panel">
+          <h3>Active Rooms</h3>
+          <div id="live-rooms-list" class="live-list"></div>
+        </div>
+        <div class="live-panel wide">
+          <h3>Event Log</h3>
+          <div id="live-event-log" class="event-log"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Players ── -->
+    <div id="page-players" class="admin-page">
+      <div class="page-header">
+        <h1>Players</h1>
+        <div class="header-actions">
+          <input type="text" id="player-search" placeholder="Search username..." class="search-input" oninput="searchPlayers()">
+          <select id="role-filter" class="filter-select" onchange="searchPlayers()">
+            <option value="">All Roles</option>
+            <option value="player">Player</option>
+            <option value="admin">Admin</option>
+            <option value="owner">Owner</option>
+          </select>
+          <button class="btn-sm btn-primary-sm" onclick="searchPlayers()">Search</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="admin-table" id="players-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Kills</th>
+              <th>Wins</th>
+              <th>Coins</th>
+              <th>Volts</th>
+              <th>BP Level</th>
+              <th>Status</th>
+              <th>Last Login</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="players-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="players-pagination"></div>
+
+      <!-- Player Detail Modal -->
+      <div id="player-modal" class="modal" style="display:none">
+        <div class="modal-box large">
+          <div class="modal-header">
+            <h2 id="modal-player-name">Player</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+          </div>
+          <div class="modal-body" id="modal-player-body"></div>
+          <div class="modal-actions" id="modal-player-actions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Ban List ── -->
+    <div id="page-bans" class="admin-page">
+      <div class="page-header"><h1>Ban List</h1></div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Username</th><th>Reason</th><th>Banned By</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="bans-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Leaderboard ── -->
+    <div id="page-leaderboard" class="admin-page">
+      <div class="page-header"><h1>Leaderboard</h1><button class="btn-sm btn-primary-sm" onclick="loadLeaderboard()">↻ Refresh</button></div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Rank</th><th>Username</th><th>Kills</th><th>Deaths</th><th>K/D Ratio</th><th>Wins</th></tr></thead>
+          <tbody id="lb-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Rooms ── -->
+    <div id="page-rooms" class="admin-page">
+      <div class="page-header"><h1>Game Rooms</h1><button class="btn-sm btn-primary-sm" onclick="loadRooms()">↻ Refresh</button></div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Room ID</th><th>Map</th><th>Mode</th><th>Players</th><th>Status</th><th>Duration</th><th>Actions</th></tr></thead>
+          <tbody id="rooms-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Economy ── -->
+    <div id="page-economy" class="admin-page">
+      <div class="page-header"><h1>Economy Tools</h1></div>
+      <div class="economy-grid">
+        <div class="eco-panel">
+          <h3>Give Volts</h3>
+          <div class="eco-form">
+            <input type="text" id="eco-vb-user" placeholder="Username" class="eco-input">
+            <input type="number" id="eco-vb-amount" placeholder="Amount" class="eco-input" min="1">
+            <button class="btn-admin-primary" onclick="giveVolts()">Give Volts</button>
+          </div>
+          <div class="eco-result" id="eco-vb-result"></div>
+        </div>
+        <div class="eco-panel">
+          <h3>Give Coins</h3>
+          <div class="eco-form">
+            <input type="text" id="eco-coin-user" placeholder="Username" class="eco-input">
+            <input type="number" id="eco-coin-amount" placeholder="Amount" class="eco-input" min="1">
+            <button class="btn-admin-primary" onclick="giveCoins()">Give Coins</button>
+          </div>
+          <div class="eco-result" id="eco-coin-result"></div>
+        </div>
+        <div class="eco-panel">
+          <h3>Reset Player Stats</h3>
+          <div class="eco-form">
+            <input type="text" id="eco-reset-user" placeholder="Username" class="eco-input">
+            <button class="btn-danger-sm" onclick="resetStats()">Reset Stats</button>
+          </div>
+          <div class="eco-result" id="eco-reset-result"></div>
+        </div>
+        <div class="eco-panel">
+          <h3>Change Role</h3>
+          <div class="eco-form">
+            <input type="text" id="eco-role-user" placeholder="Username" class="eco-input">
+            <select id="eco-role-select" class="eco-input">
+              <option value="player">Player</option>
+              <option value="admin">Admin</option>
+              <option value="owner">Owner</option>
+            </select>
+            <button class="btn-admin-primary" onclick="changeRole()">Set Role</button>
+          </div>
+          <div class="eco-result" id="eco-role-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Announce ── -->
+    <div id="page-announce" class="admin-page">
+      <div class="page-header"><h1>Announcements</h1></div>
+      <div class="announce-grid">
+        <div class="announce-compose">
+          <h3>Send Announcement</h3>
+          <textarea id="announce-message" placeholder="Type your announcement..." rows="4"></textarea>
+          <div class="announce-type-row">
+            <select id="announce-type">
+              <option value="info">ℹ Info</option>
+              <option value="warning">⚠ Warning</option>
+              <option value="danger">🚨 Danger</option>
+              <option value="success">✅ Success</option>
+            </select>
+            <button class="btn-admin-primary" onclick="sendAnnouncement()">📢 Broadcast</button>
+          </div>
+          <div id="announce-result"></div>
+        </div>
+        <div class="announce-history">
+          <h3>Announcement History</h3>
+          <div id="announce-history-list" class="history-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Server Info ── -->
+    <div id="page-settings" class="admin-page">
+      <div class="page-header"><h1>Server Info</h1><button class="btn-sm btn-primary-sm" onclick="loadServerInfo()">↻ Refresh</button></div>
+      <div class="server-info-grid">
+        <div class="info-panel">
+          <h3>System Info</h3>
+          <div id="server-sys-info" class="info-list"></div>
+        </div>
+        <div class="info-panel">
+          <h3>Memory Usage</h3>
+          <div id="server-mem-info" class="info-list"></div>
+        </div>
+        <div class="info-panel">
+          <h3>Game Statistics</h3>
+          <div id="server-game-info" class="info-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// ZapZone Admin Panel Logic
+// ════════════════════════════════════════════════════════════════
+
+let adminToken = null;
+let adminAccount = null;
+let currentPage = 'dashboard';
+let playerPage = 1;
+let liveInterval = null;
+
+// ─── Login / Auth ─────────────────────────────────────────────────────────────
+async function adminLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('al-user').value.trim();
+  const password = document.getElementById('al-pass').value;
+  const errEl = document.getElementById('al-error');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error; return; }
+    if (data.account.role !== 'admin' && data.account.role !== 'owner') {
+      errEl.textContent = 'Admin or Owner access required';
+      return;
+    }
+    adminToken = data.token;
+    adminAccount = data.account;
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'flex';
+    document.getElementById('admin-username-display').textContent = adminAccount.username;
+    const roleEl = document.getElementById('admin-role-display');
+    roleEl.textContent = adminAccount.role === 'owner' ? 'OWNER' : 'ADMIN';
+    roleEl.className = `role-chip role-${adminAccount.role}`;
+    showPage('dashboard');
+    refreshDashboard();
+  } catch(err) {
+    errEl.textContent = 'Connection error';
+  }
+}
+
+function adminLogout() {
+  adminToken = null;
+  adminAccount = null;
+  stopLiveMonitor();
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'flex';
+}
+
+async function apiGet(path) {
+  const res = await fetch(path, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+  if (res.status === 401 || res.status === 403) { adminLogout(); throw new Error('Unauthorized'); }
+  return res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+    body: JSON.stringify(body)
+  });
+  return { ok: res.ok, data: await res.json() };
+}
+
+async function apiDelete(path) {
+  const res = await fetch(path, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminToken}` } });
+  return { ok: res.ok, data: await res.json() };
+}
+
+// ─── Page Navigation ──────────────────────────────────────────────────────────
+function showPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById(`page-${page}`);
+  if (pageEl) pageEl.classList.add('active');
+  const navEl = document.querySelector(`[data-page="${page}"]`);
+  if (navEl) navEl.classList.add('active');
+
+  // Load page data
+  switch (page) {
+    case 'dashboard': refreshDashboard(); break;
+    case 'players': loadPlayers(); break;
+    case 'bans': loadBans(); break;
+    case 'leaderboard': loadLeaderboard(); break;
+    case 'rooms': loadRooms(); break;
+    case 'announce': loadAnnouncements(); break;
+    case 'settings': loadServerInfo(); break;
+    case 'live': startLiveMonitor(); break;
+  }
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+async function refreshDashboard() {
+  try {
+    const [stats, serverInfo] = await Promise.all([
+      apiGet('/api/admin/stats'),
+      apiGet('/api/admin/server-info')
+    ]);
+
+    document.getElementById('stat-online').textContent = stats.onlinePlayers;
+    document.getElementById('stat-total').textContent = stats.totalAccounts;
+    document.getElementById('stat-matches').textContent = stats.activeRooms;
+    document.getElementById('stat-kills').textContent = stats.totalKills.toLocaleString();
+    document.getElementById('stat-waiting').textContent = stats.waitingRooms;
+    document.getElementById('stat-total-matches').textContent = stats.totalMatches.toLocaleString();
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+    // Announcements
+    const annoEl = document.getElementById('dash-announcements');
+    if (annoEl) {
+      annoEl.innerHTML = (stats.announcements || []).slice(0, 5).map(a => `
+        <div class="dash-item anno-${a.type}">
+          <span class="dash-item-icon">${a.type === 'warning' ? '⚠' : a.type === 'danger' ? '🚨' : 'ℹ'}</span>
+          <div>
+            <div class="dash-item-title">${esc(a.message)}</div>
+            <div class="dash-item-sub">by ${esc(a.author)} · ${timeAgo(a.at)}</div>
+          </div>
+        </div>
+      `).join('') || '<div class="empty-dash">No announcements yet</div>';
+    }
+
+    // Server health
+    const healthEl = document.getElementById('server-health');
+    if (healthEl && serverInfo) {
+      const uptime = formatUptime(serverInfo.uptime);
+      const memMB = (serverInfo.memory.rss / 1024 / 1024).toFixed(1);
+      const heapMB = (serverInfo.memory.heapUsed / 1024 / 1024).toFixed(1);
+      const heapTotal = (serverInfo.memory.heapTotal / 1024 / 1024).toFixed(1);
+      const heapPct = Math.round((serverInfo.memory.heapUsed / serverInfo.memory.heapTotal) * 100);
+      healthEl.innerHTML = `
+        <div class="health-row"><span>Uptime</span><strong>${uptime}</strong></div>
+        <div class="health-row"><span>Node.js</span><strong>${serverInfo.nodeVersion}</strong></div>
+        <div class="health-row"><span>Platform</span><strong>${serverInfo.platform}</strong></div>
+        <div class="health-row"><span>RSS Memory</span><strong>${memMB} MB</strong></div>
+        <div class="health-row"><span>Heap Used</span><strong>${heapMB} / ${heapTotal} MB</strong></div>
+        <div class="mem-bar-wrap">
+          <div class="mem-bar"><div class="mem-bar-fill ${heapPct > 80 ? 'danger' : heapPct > 60 ? 'warning' : ''}" style="width:${heapPct}%"></div></div>
+          <span>${heapPct}%</span>
+        </div>
+      `;
+    }
+  } catch(e) { console.error('Dashboard refresh failed', e); }
+}
+
+// ─── Live Monitor ─────────────────────────────────────────────────────────────
+function startLiveMonitor() {
+  updateLive();
+  if (liveInterval) clearInterval(liveInterval);
+  liveInterval = setInterval(updateLive, 3000);
+}
+
+function stopLiveMonitor() {
+  if (liveInterval) { clearInterval(liveInterval); liveInterval = null; }
+}
+
+async function updateLive() {
+  if (currentPage !== 'live') return;
+  try {
+    const [stats, rooms] = await Promise.all([
+      apiGet('/api/admin/stats'),
+      apiGet('/api/admin/rooms')
+    ]);
+    document.getElementById('live-count').textContent = stats.onlinePlayers;
+
+    // Rooms
+    const roomsEl = document.getElementById('live-rooms-list');
+    if (roomsEl) {
+      roomsEl.innerHTML = rooms.map(r => `
+        <div class="live-item">
+          <div class="live-item-header">
+            <span class="live-room-id">${r.id}</span>
+            <span class="live-status status-${r.status}">${r.status}</span>
+          </div>
+          <div class="live-item-sub">${r.mode} · ${r.mapId} · ${r.playerCount}/${r.maxPlayers} players</div>
+          ${r.status === 'playing' ? `<button class="btn-xs btn-danger-xs" onclick="closeRoom('${r.id}')">Close Room</button>` : ''}
+        </div>
+      `).join('') || '<div class="empty-dash">No active rooms</div>';
+    }
+
+    // Event log entry
+    const log = document.getElementById('live-event-log');
+    if (log) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span> — ${stats.onlinePlayers} online, ${rooms.filter(r=>r.status==='playing').length} active rooms`;
+      log.prepend(entry);
+      while (log.children.length > 50) log.lastChild.remove();
+    }
+  } catch(e) {}
+}
+
+// ─── Players ─────────────────────────────────────────────────────────────────
+async function loadPlayers() {
+  const search = document.getElementById('player-search')?.value || '';
+  const role = document.getElementById('role-filter')?.value || '';
+  try {
+    const data = await apiGet(`/api/admin/players?search=${encodeURIComponent(search)}&role=${role}&page=${playerPage}&limit=20`);
+    const tbody = document.getElementById('players-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = data.players.map(p => `
+      <tr class="${p.isBanned ? 'banned-row' : ''} ${p.role === 'owner' ? 'owner-row' : p.role === 'admin' ? 'admin-row' : ''}">
+        <td class="player-name-cell">
+          <span class="player-avatar">👤</span>
+          <strong>${esc(p.username)}</strong>
+          ${p.isBanned ? '<span class="badge-banned">BANNED</span>' : ''}
+        </td>
+        <td><span class="role-chip-sm role-${p.role}">${p.role.toUpperCase()}</span></td>
+        <td>${(p.stats?.kills || 0).toLocaleString()}</td>
+        <td>${(p.stats?.wins || 0).toLocaleString()}</td>
+        <td>${(p.coins || 0).toLocaleString()}</td>
+        <td>${(p.volts || 0).toLocaleString()}</td>
+        <td>${p.battlepass?.level || 1}</td>
+        <td><span class="status-dot ${p.isBanned ? 'banned' : 'active'}"></span> ${p.isBanned ? 'Banned' : 'Active'}</td>
+        <td>${p.lastLogin ? new Date(p.lastLogin).toLocaleDateString() : 'Never'}</td>
+        <td class="actions-cell">
+          <button class="btn-xs" onclick="viewPlayer('${esc(p.username)}')">View</button>
+          ${!p.isBanned && p.role !== 'owner' ? `<button class="btn-xs btn-danger-xs" onclick="quickBan('${esc(p.username)}')">Ban</button>` : ''}
+          ${p.isBanned ? `<button class="btn-xs btn-success-xs" onclick="unbanPlayer('${esc(p.username)}')">Unban</button>` : ''}
+          ${p.role !== 'owner' ? `<button class="btn-xs btn-warn-xs" onclick="kickPlayer('${esc(p.username)}')">Kick</button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+
+    // Pagination
+    const pgEl = document.getElementById('players-pagination');
+    if (pgEl) {
+      const pages = data.pages;
+      pgEl.innerHTML = Array.from({ length: Math.min(pages, 10) }, (_, i) => `
+        <button class="pg-btn ${i + 1 === playerPage ? 'active' : ''}" onclick="goPage(${i + 1})">${i + 1}</button>
+      `).join('');
+    }
+  } catch(e) { console.error('Load players failed', e); }
+}
+
+function goPage(n) { playerPage = n; loadPlayers(); }
+
+async function searchPlayers() { playerPage = 1; await loadPlayers(); }
+
+async function viewPlayer(username) {
+  try {
+    const p = await apiGet(`/api/admin/player/${encodeURIComponent(username)}`);
+    const modal = document.getElementById('player-modal');
+    document.getElementById('modal-player-name').textContent = p.username;
+
+    document.getElementById('modal-player-body').innerHTML = `
+      <div class="player-detail-grid">
+        <div class="detail-section">
+          <h4>Account Info</h4>
+          <div class="detail-row"><span>ID</span><strong>${p.id}</strong></div>
+          <div class="detail-row"><span>Username</span><strong>${esc(p.username)}</strong></div>
+          <div class="detail-row"><span>Role</span><span class="role-chip-sm role-${p.role}">${p.role}</span></div>
+          <div class="detail-row"><span>Status</span><strong>${p.isBanned ? '🚫 Banned' : '✅ Active'}</strong></div>
+          ${p.isBanned ? `<div class="detail-row ban-info"><span>Ban Reason</span><strong>${esc(p.banReason || 'N/A')}</strong></div>` : ''}
+          <div class="detail-row"><span>Created</span><strong>${new Date(p.createdAt).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>Last Login</span><strong>${p.lastLogin ? new Date(p.lastLogin).toLocaleString() : 'Never'}</strong></div>
+        </div>
+        <div class="detail-section">
+          <h4>Economy</h4>
+          <div class="detail-row"><span>Coins</span><strong>${(p.coins || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>Volts</span><strong>${(p.volts || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>BP Level</span><strong>${p.battlepass?.level || 1}</strong></div>
+          <div class="detail-row"><span>BP XP</span><strong>${(p.battlepass?.xp || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>BP Premium</span><strong>${p.battlepass?.premium ? '✅ Yes' : '❌ No'}</strong></div>
+          <div class="detail-row"><span>Active Skin</span><strong>${p.activeSkin || 'default'}</strong></div>
+          <div class="detail-row"><span>Skins Owned</span><strong>${p.skins === '*' ? 'ALL' : Array.isArray(p.skins) ? p.skins.length : 0}</strong></div>
+        </div>
+        <div class="detail-section">
+          <h4>Game Stats</h4>
+          <div class="detail-row"><span>Kills</span><strong>${(p.stats?.kills || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>Deaths</span><strong>${(p.stats?.deaths || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>K/D Ratio</span><strong>${p.stats?.deaths > 0 ? (p.stats.kills / p.stats.deaths).toFixed(2) : p.stats?.kills || 0}</strong></div>
+          <div class="detail-row"><span>Wins</span><strong>${(p.stats?.wins || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>Losses</span><strong>${(p.stats?.losses || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>Matches</span><strong>${(p.stats?.matches || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>Win Rate</span><strong>${p.stats?.matches > 0 ? Math.round(p.stats.wins / p.stats.matches * 100) : 0}%</strong></div>
+          <div class="detail-row"><span>Headshots</span><strong>${(p.stats?.headshots || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>Damage</span><strong>${(p.stats?.damage || 0).toLocaleString()}</strong></div>
+          <div class="detail-row"><span>Quests Done</span><strong>${(p.quests?.completed?.length || 0)}</strong></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('modal-player-actions').innerHTML = `
+      <div class="modal-action-group">
+        ${!p.isBanned && p.role !== 'owner' ? `
+          <button class="btn-danger-sm" onclick="banPlayer('${esc(p.username)}')">🚫 Ban Player</button>
+        ` : ''}
+        ${p.isBanned ? `
+          <button class="btn-success-sm" onclick="unbanPlayer('${esc(p.username)}'); closeModal()">✅ Unban</button>
+        ` : ''}
+        ${p.role !== 'owner' ? `
+          <button class="btn-warn-sm" onclick="kickPlayer('${esc(p.username)}')">⚠ Kick</button>
+          <button class="btn-sm-neutral" onclick="resetPlayerStats('${esc(p.username)}')">🔄 Reset Stats</button>
+        ` : ''}
+        <button class="btn-primary-sm" onclick="openGiveModal('${esc(p.username)}')">💰 Give Currency</button>
+      </div>
+    `;
+
+    modal.style.display = 'flex';
+  } catch(e) { console.error('View player failed', e); }
+}
+
+function closeModal() {
+  document.getElementById('player-modal').style.display = 'none';
+}
+
+async function quickBan(username) {
+  const reason = prompt(`Ban reason for ${username}:`, 'Violation of Terms of Service');
+  if (!reason) return;
+  await banPlayerWithReason(username, reason);
+}
+
+async function banPlayer(username) {
+  const reason = prompt(`Ban reason for ${username}:`, 'Violation of Terms of Service');
+  if (!reason) return;
+  await banPlayerWithReason(username, reason);
+  closeModal();
+}
+
+async function banPlayerWithReason(username, reason) {
+  const { ok, data } = await apiPost('/api/admin/ban', { username, reason });
+  if (ok) { showNotif(`${username} banned`, 'success'); loadPlayers(); }
+  else showNotif(data.error, 'error');
+}
+
+async function unbanPlayer(username) {
+  const { ok, data } = await apiPost('/api/admin/unban', { username });
+  if (ok) { showNotif(`${username} unbanned`, 'success'); loadPlayers(); }
+  else showNotif(data.error, 'error');
+}
+
+async function kickPlayer(username) {
+  const reason = prompt('Kick reason:', 'Kicked by admin');
+  if (!reason) return;
+  const { ok, data } = await apiPost('/api/admin/kick-player', { username, reason });
+  if (ok) showNotif(`${username} kicked`, 'success');
+  else showNotif(data.error || 'Player not online', 'warning');
+}
+
+async function resetPlayerStats(username) {
+  if (!confirm(`Reset stats for ${username}?`)) return;
+  const { ok } = await apiPost('/api/admin/reset-stats', { username });
+  if (ok) { showNotif('Stats reset', 'success'); viewPlayer(username); }
+}
+
+function openGiveModal(username) {
+  const amount = prompt(`Give Volts to ${username}:`);
+  if (amount && !isNaN(amount)) giveVoltsTo(username, parseInt(amount));
+}
+
+async function giveVoltsTo(username, amount) {
+  const { ok, data } = await apiPost('/api/admin/give-volts', { username, amount });
+  if (ok) showNotif(`Gave ${amount} Volts to ${username}`, 'success');
+  else showNotif(data.error, 'error');
+}
+
+async function changeRoleFor(username, role) {
+  const { ok, data } = await apiPost('/api/admin/set-role', { username, role });
+  if (ok) { showNotif(`${username} is now ${role}`, 'success'); loadPlayers(); }
+  else showNotif(data.error, 'error');
+}
+
+// ─── Bans ────────────────────────────────────────────────────────────────────
+async function loadBans() {
+  try {
+    const bans = await apiGet('/api/admin/bans');
+    const tbody = document.getElementById('bans-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = bans.length === 0
+      ? '<tr><td colspan="5" class="empty-cell">No active bans</td></tr>'
+      : bans.map(b => `
+      <tr>
+        <td><strong>${esc(b.username)}</strong></td>
+        <td>${esc(b.reason || 'No reason')}</td>
+        <td>${esc(b.bannedBy || 'Unknown')}</td>
+        <td>${b.at ? new Date(b.at).toLocaleString() : 'Unknown'}</td>
+        <td><button class="btn-xs btn-success-xs" onclick="unbanPlayer('${esc(b.username)}'); loadBans()">Unban</button></td>
+      </tr>
+    `).join('');
+  } catch(e) {}
+}
+
+// ─── Leaderboard ─────────────────────────────────────────────────────────────
+async function loadLeaderboard() {
+  try {
+    const data = await apiGet('/api/leaderboard');
+    const tbody = document.getElementById('lb-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = data.map((p, i) => `
+      <tr>
+        <td class="rank-cell">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+        <td><strong>${esc(p.username)}</strong></td>
+        <td>${p.kills.toLocaleString()}</td>
+        <td>${p.deaths.toLocaleString()}</td>
+        <td>${p.kdr}</td>
+        <td>${p.wins.toLocaleString()}</td>
+      </tr>
+    `).join('');
+  } catch(e) {}
+}
+
+// ─── Rooms ───────────────────────────────────────────────────────────────────
+async function loadRooms() {
+  try {
+    const rooms = await apiGet('/api/admin/rooms');
+    const tbody = document.getElementById('rooms-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = rooms.length === 0
+      ? '<tr><td colspan="7" class="empty-cell">No rooms active</td></tr>'
+      : rooms.map(r => `
+      <tr>
+        <td><code>${r.id}</code></td>
+        <td>${r.mapId}</td>
+        <td><span class="mode-badge mode-${r.mode}">${r.mode}</span></td>
+        <td>${r.playerCount}/${r.maxPlayers}</td>
+        <td><span class="status-badge status-${r.status}">${r.status}</span></td>
+        <td>${r.startTime ? formatUptime((Date.now() - r.startTime) / 1000) : '—'}</td>
+        <td><button class="btn-xs btn-danger-xs" onclick="closeRoom('${r.id}')">Close</button></td>
+      </tr>
+    `).join('');
+  } catch(e) {}
+}
+
+async function closeRoom(roomId) {
+  if (!confirm(`Close room ${roomId}?`)) return;
+  const { ok } = await apiDelete(`/api/admin/room/${roomId}`);
+  if (ok) { showNotif('Room closed', 'success'); loadRooms(); }
+}
+
+// ─── Economy ──────────────────────────────────────────────────────────────────
+async function giveVolts() {
+  const username = document.getElementById('eco-vb-user').value.trim();
+  const amount = parseInt(document.getElementById('eco-vb-amount').value);
+  if (!username || isNaN(amount)) { showEcoResult('eco-vb-result', 'Invalid input', 'error'); return; }
+  const { ok, data } = await apiPost('/api/admin/give-volts', { username, amount });
+  showEcoResult('eco-vb-result', ok ? `✓ Gave ${amount} Volts to ${username}. New balance: ${data.newBalance}` : data.error, ok ? 'success' : 'error');
+}
+
+async function giveCoins() {
+  const username = document.getElementById('eco-coin-user').value.trim();
+  const amount = parseInt(document.getElementById('eco-coin-amount').value);
+  if (!username || isNaN(amount)) { showEcoResult('eco-coin-result', 'Invalid input', 'error'); return; }
+  const { ok, data } = await apiPost('/api/admin/give-coins', { username, amount });
+  showEcoResult('eco-coin-result', ok ? `✓ Gave ${amount} coins to ${username}. New balance: ${data.newBalance}` : data.error, ok ? 'success' : 'error');
+}
+
+async function resetStats() {
+  const username = document.getElementById('eco-reset-user').value.trim();
+  if (!username) return;
+  if (!confirm(`Reset stats for ${username}? This cannot be undone.`)) return;
+  const { ok, data } = await apiPost('/api/admin/reset-stats', { username });
+  showEcoResult('eco-reset-result', ok ? `✓ Stats reset for ${username}` : data.error, ok ? 'success' : 'error');
+}
+
+async function changeRole() {
+  const username = document.getElementById('eco-role-user').value.trim();
+  const role = document.getElementById('eco-role-select').value;
+  if (!username) return;
+  const { ok, data } = await apiPost('/api/admin/set-role', { username, role });
+  showEcoResult('eco-role-result', ok ? `✓ ${username} is now ${role}` : data.error, ok ? 'success' : 'error');
+}
+
+function showEcoResult(id, msg, type) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg; el.className = `eco-result eco-result-${type}`; }
+}
+
+// ─── Announcements ────────────────────────────────────────────────────────────
+async function sendAnnouncement() {
+  const message = document.getElementById('announce-message').value.trim();
+  const type = document.getElementById('announce-type').value;
+  if (!message) { showNotif('Enter a message', 'warning'); return; }
+  const { ok } = await apiPost('/api/admin/announce', { message, type });
+  if (ok) {
+    showNotif('Announcement sent!', 'success');
+    document.getElementById('announce-message').value = '';
+    document.getElementById('announce-result').textContent = '✓ Sent to all online players';
+    loadAnnouncements();
+  }
+}
+
+async function loadAnnouncements() {
+  try {
+    const stats = await apiGet('/api/admin/stats');
+    const list = document.getElementById('announce-history-list');
+    if (!list) return;
+    list.innerHTML = (stats.announcements || []).map(a => `
+      <div class="history-item anno-${a.type}">
+        <div class="history-msg">${esc(a.message)}</div>
+        <div class="history-meta">by ${esc(a.author)} · ${timeAgo(a.at)} · <span class="type-label">${a.type}</span></div>
+      </div>
+    `).join('') || '<div class="empty-dash">No announcements yet</div>';
+  } catch(e) {}
+}
+
+// ─── Server Info ──────────────────────────────────────────────────────────────
+async function loadServerInfo() {
+  try {
+    const info = await apiGet('/api/admin/server-info');
+    const sysEl = document.getElementById('server-sys-info');
+    const memEl = document.getElementById('server-mem-info');
+    const gameEl = document.getElementById('server-game-info');
+
+    if (sysEl) sysEl.innerHTML = `
+      <div class="info-row"><span>Uptime</span><strong>${formatUptime(info.uptime)}</strong></div>
+      <div class="info-row"><span>Node.js</span><strong>${info.nodeVersion}</strong></div>
+      <div class="info-row"><span>Platform</span><strong>${info.platform}</strong></div>
+    `;
+
+    if (memEl) {
+      const rss = (info.memory.rss / 1024 / 1024).toFixed(2);
+      const heapUsed = (info.memory.heapUsed / 1024 / 1024).toFixed(2);
+      const heapTotal = (info.memory.heapTotal / 1024 / 1024).toFixed(2);
+      const ext = (info.memory.external / 1024 / 1024).toFixed(2);
+      memEl.innerHTML = `
+        <div class="info-row"><span>RSS</span><strong>${rss} MB</strong></div>
+        <div class="info-row"><span>Heap Used</span><strong>${heapUsed} MB</strong></div>
+        <div class="info-row"><span>Heap Total</span><strong>${heapTotal} MB</strong></div>
+        <div class="info-row"><span>External</span><strong>${ext} MB</strong></div>
+      `;
+    }
+
+    if (gameEl) gameEl.innerHTML = `
+      <div class="info-row"><span>Total Players</span><strong>${info.totalPlayers.toLocaleString()}</strong></div>
+      <div class="info-row"><span>Total Matches</span><strong>${info.totalMatches.toLocaleString()}</strong></div>
+      <div class="info-row"><span>Total Kills</span><strong>${info.totalKills.toLocaleString()}</strong></div>
+    `;
+  } catch(e) { console.error('Server info failed', e); }
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+function showNotif(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `admin-notif admin-notif-${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 400); }, 3000);
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function formatUptime(seconds) {
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+// Auto-refresh dashboard every 30s
+setInterval(() => { if (currentPage === 'dashboard') refreshDashboard(); }, 30000);
+
+</script>
+</body>
+</html>
